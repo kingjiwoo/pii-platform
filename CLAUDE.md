@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `18 / 52` task 완료 (35%)
+**전체:** `21 / 52` task 완료 (40%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
-| PR 1 ⭐ | `feat/gateway` | 10/16 | ⏳ 진행중 |
+| PR 1 ⭐ | `feat/gateway` | 13/16 | ⏳ 진행중 |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 1 진행중. T1.1~T1.10 완료. **뱅크 K8s 필수요건 1차 확보 🎯** 다음 = T1.11 (kubectl 디버깅 4종 학습).
+**현재 위치:** PR 1 진행중. T1.1~T1.13 완료 (FastAPI stub 작성). 다음 = T1.14 (FastAPI Dockerfile).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,9 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ **T1.13** — `src/api/main.py` (FastAPI stub: lifespan-managed httpx client, `/health/liveliness`, `/health/readiness`, `/v1/chat/completions` forwarder) + `requirements.txt` (fastapi 0.115, uvicorn 0.30, httpx 0.27)
+- ✅ **T1.12** — LiteLLM 단독 스모크 완료 커밋 (`feat(k8s): deploy litellm gateway and verify end-to-end`)
+- ✅ **T1.11** — kubectl 디버깅 4종 (`get -w`, `describe`, `logs`, `exec`) 학습. T1.10 트러블슈팅 실전 경험 문서화
 - ✅ **T1.10** 🎉 — `helm install gateway` 성공 → curl 스모크 200 응답 (`{"content":"Hello!"}`). 트래픽 전체 경로 검증. `scripts/smoke-gateway.sh` 재사용 스크립트 확보
 - ✅ **T1.9** — ingress-nginx Controller 설치 완료 + `values.yaml`에서 Ingress 활성화 (`gateway.localtest.me`, `pathType: Prefix`)
 - ✅ **T1.8** — ConfigMap + Secret 템플릿 추가, Deployment에 envFrom·volumeMount·checksum 트릭 적용. `helm template` 렌더링 검증 완료
@@ -67,6 +70,12 @@ _없음_
   1. **LiteLLM `/health`가 master_key 인증 요구** → K8s probe가 401 → CrashLoopBackOff. 해결: `/health/liveliness`, `/health/readiness` (인증 없는 별도 엔드포인트)로 변경.
   2. **shell `$OPENAI_API_KEY` 미로드 상태에서 helm upgrade** → Secret에 빈값 → OpenAI 401. 해결: `set -a; source .env; set +a`로 재로드 후 helm upgrade.
   3. **OpenAI 크레딧 소진** → 429 RateLimitError. 해결: billing 페이지에서 충전.
+- **아키텍처 트레이드오프 검토: Front-FastAPI 유지** (2026-08-09). LiteLLM을 gateway로 앞에 두고 FastAPI를 callback 대상으로 두는 대안 검토. 결론: Front-FastAPI 유지.
+  이유:
+  (1) 도메인 로직(PII)을 순수 Python 함수로 테스트·이식 자유 확보 (callback 방식은 LiteLLM 내부 계약에 종속)
+  (2) 재활용 자산 BYOK/JWT/agents가 front edge에 자연스럽게 매핑
+  (3) 뱅크 맥락에서 표준 마이크로서비스 패턴 선호 (custom hook은 감사·유지보수 우려)
+  Day 1 forwarder는 PR 3의 라우팅 로직 자리를 미리 확보하는 용도. 면접 방어 자산으로 이 검토 자체를 활용.
 
 ---
 
