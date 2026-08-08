@@ -1,0 +1,54 @@
+<svg width="100%" viewBox="0 0 680 470" role="img" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+<title>하이브리드 LLM 게이트웨이 아키텍처</title>
+<desc>클라이언트 요청이 K8s 클러스터 내 LiteLLM 게이트웨이로 들어가고, PII가 감지되면 온프레 vLLM으로, 일반 요청은 외부 상용 API로 라우팅된다. Prometheus/Grafana가 비용과 지연을 관측한다.</desc>
+<style>
+  .t{font-size:14px;fill:#1a1a1a}
+  .ts{font-size:12px;fill:#666}
+  .th{font-size:14px;font-weight:500;fill:#1a1a1a}
+  .box{fill:#f7f7f5;stroke:#cfcfc9;stroke-width:1}
+  .arr{stroke:#8a8a82;stroke-width:1.5;fill:none}
+  .leader{stroke:#b5b5ad;stroke-width:1;stroke-dasharray:3 3;fill:none}
+  .amber rect,.amber .sq{fill:#fbefd6;stroke:#e0a83e}
+  .blue rect,.blue .sq{fill:#dbeafe;stroke:#5b8def}
+  .gray rect{fill:#eeeeec;stroke:#c2c2ba}
+</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<rect x="40" y="105" width="390" height="320" rx="12" fill="none" stroke="#cfcfc9" stroke-dasharray="6 4"/>
+<text class="ts" x="52" y="125">K8s 클러스터 · 온프레미스</text>
+
+<rect x="145" y="45" width="180" height="40" rx="8" class="box"/>
+<text class="t" x="235" y="70" text-anchor="middle">Client / 데모 요청</text>
+<line class="arr" x1="235" y1="85" x2="235" y2="138" marker-end="url(#arrow)"/>
+
+<rect x="95" y="140" width="280" height="66" rx="10" class="box"/>
+<text class="th" x="235" y="170" text-anchor="middle">LiteLLM Gateway</text>
+<text class="ts" x="235" y="190" text-anchor="middle">PII 판별 · 라우팅 · 비용 기록</text>
+
+<line class="arr" x1="180" y1="206" x2="150" y2="248" marker-end="url(#arrow)"/>
+<text class="ts" x="228" y="234">PII 감지 →</text>
+
+<line class="arr" x1="375" y1="174" x2="488" y2="278" marker-end="url(#arrow)"/>
+<text class="ts" x="398" y="212">일반 요청 →</text>
+
+<g class="amber"><rect x="70" y="250" width="150" height="64" rx="10"/>
+<text class="th" x="145" y="278" text-anchor="middle">vLLM (CPU)</text>
+<text class="ts" x="145" y="297" text-anchor="middle">온프레 · 민감정보</text></g>
+
+<g class="blue"><rect x="490" y="250" width="150" height="64" rx="10"/>
+<text class="th" x="565" y="278" text-anchor="middle">상용 API</text>
+<text class="ts" x="565" y="297" text-anchor="middle">OpenAI · Anthropic</text></g>
+
+<g class="gray"><rect x="70" y="360" width="305" height="52" rx="10"/>
+<text class="th" x="222" y="385" text-anchor="middle">Prometheus + Grafana</text>
+<text class="ts" x="222" y="402" text-anchor="middle">비용 · latency · 트래픽 관측</text></g>
+
+<line class="leader" x1="145" y1="314" x2="145" y2="358"/>
+<line class="leader" x1="300" y1="206" x2="300" y2="358"/>
+<text class="ts" x="308" y="292">메트릭 수집</text>
+
+<g class="amber"><rect class="sq" x="70" y="432" width="12" height="12" rx="3"/></g>
+<text class="ts" x="88" y="442">민감정보 → 온프레 vLLM</text>
+<g class="blue"><rect class="sq" x="300" y="432" width="12" height="12" rx="3"/></g>
+<text class="ts" x="318" y="442">일반 요청 → 상용 API</text>
+</svg>

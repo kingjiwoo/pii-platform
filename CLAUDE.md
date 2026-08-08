@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `5 / 52` task 완료 (10%)
+**전체:** `7 / 52` task 완료 (13%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
-| PR 0 | `feat/settings` (원래 계획: chore/initial-setup) | 5/8 | ⏳ 진행중 |
+| PR 0 | `feat/settings` (원래 계획: chore/initial-setup) | 7/8 | ⏳ 진행중 (T0.8 = 첫 PR만 남음) |
 | PR 1 ⭐ | `feat/day1-fastapi-litellm-on-kind` | 0/16 | 🔒 잠김 (PR 0 후) |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 0 진행중. 다음 할 일 = **T0.6** (`docs/architecture.svg` 옵시디언에서 복사).
+**현재 위치:** PR 0 마무리. 다음 할 일 = **T0.8** (첫 PR — 원격 push + PR 생성 + 셀프 머지).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,8 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ T0.7 — 커밋 컨벤션 Conventional Commits 채택 + CLAUDE.md 반영
+- ✅ T0.6 — `docs/architecture.svg` 옵시디언에서 복사 (3.3KB)
 - ✅ T0.5 — `Makefile` 뼈대 (help/kind/build/load/install/uninstall/deploy/pf/logs/smoke, `##@` 섹션 헤더 + `##` 자동 도움말)
 - ✅ T0.4 — `.env.example` (OPENAI/ANTHROPIC/LITELLM_MASTER_KEY 플레이스홀더) + `.editorconfig` (YAML 2sp, Python 4sp, Makefile tab, LF)
 - ✅ T0.3 — 디렉토리 스켈레톤 (deploy/{kind,helm/{api,litellm,vllm,monitoring},monitoring,grafana}, docker/{api,litellm,vllm}, src/api, scripts, docs)
@@ -95,6 +97,32 @@ vLLM CPU 이미지 빌드가 무겁고 컴파일이 이동 중 네트워크/사�
 
 - `/new-branch [name]` — `origin/main` 최신 기준으로 로컬 브랜치 생성 + checkout. 인자 없으면 `develop`. push 안 함.
 
-## 커밋 컨벤션
+## 커밋 컨벤션 — Conventional Commits
 
-아직 미정. 첫 커밋 만들 때 결정 후 여기 기록.
+**포맷:** `<type>(<scope>): <subject>`
+
+**Type:**
+- `feat` — 새 기능 (사용자에게 보이는 변화)
+- `fix` — 버그 수정
+- `chore` — 빌드·설정·툴링 (동작 변화 없음)
+- `docs` — 문서만 변경
+- `refactor` — 리팩토링 (동작 변화 없음)
+- `test` — 테스트 추가·수정
+- `style` — 포맷·공백만
+
+**Scope (선택):** `api`, `litellm`, `vllm`, `helm`, `k8s`, `ci`, `deps` 등
+
+**Body (선택):** what/why/tradeoff 짧게. 왜 이렇게 했는지 결정 근거 담기.
+
+**예시:**
+```
+feat(api): add PII detection middleware
+
+한국어 정규식(계좌·주민·카드·전화) 기반 감지 → 마스킹 → LiteLLM으로 forward.
+Presidio 대신 정규식 채택: 데모 스코프에 충분, 설치 리스크 회피.
+```
+
+**규칙:**
+- subject는 명령형·소문자·마침표 없이 (`add`, `update`, `fix` — `added`/`Adds` X)
+- 하나의 커밋 = 하나의 관심사 (섞지 말 것)
+- 스코프 확실할 때만 붙임 (여러 파트 걸치면 생략)
