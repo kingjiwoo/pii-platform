@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `16 / 52` task 완료 (31%)
+**전체:** `17 / 52` task 완료 (33%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
-| PR 1 ⭐ | `feat/gateway` | 8/16 | ⏳ 진행중 |
+| PR 1 ⭐ | `feat/gateway` | 9/16 | ⏳ 진행중 |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 1 진행중. T1.1~T1.8 완료. 다음 = T1.9 (ingress-nginx 설치 + Ingress 활성화).
+**현재 위치:** PR 1 진행중. T1.1~T1.9 완료. 다음 = T1.10 (helm install + 스모크 테스트).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,7 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ **T1.9** — ingress-nginx Controller 설치 완료 + `values.yaml`에서 Ingress 활성화 (`gateway.localtest.me`, `pathType: Prefix`)
 - ✅ **T1.8** — ConfigMap + Secret 템플릿 추가, Deployment에 envFrom·volumeMount·checksum 트릭 적용. `helm template` 렌더링 검증 완료
 - ✅ **T1.7** — `values.yaml` 우리 값으로 조정 (`pii-litellm:dev`, port 4000, `/health` probe). `helm template`로 렌더링 검증 완료
 - ✅ **T1.6** — `helm create deploy/helm/litellm` + 생성 파일 순회 학습 (Chart.yaml, values.yaml, deployment.yaml)
