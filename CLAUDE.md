@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `2 / 48` task 완료 (4%)
+**전체:** `3 / 52` task 완료 (6%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
-| PR 0 | `feat/settings` (원래 계획: chore/initial-setup) | 2/8 | ⏳ 진행중 |
-| PR 1 ⭐ | `feat/day1-litellm-on-kind` | 0/12 | 🔒 잠김 (PR 0 후) |
+| PR 0 | `feat/settings` (원래 계획: chore/initial-setup) | 3/8 | ⏳ 진행중 |
+| PR 1 ⭐ | `feat/day1-fastapi-litellm-on-kind` | 0/16 | 🔒 잠김 (PR 0 후) |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 0 진행중. 다음 할 일 = **T0.3** (디렉토리 스켈레톤).
+**현재 위치:** PR 0 진행중. 다음 할 일 = **T0.4** (`.env.example` + `.editorconfig`).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,7 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ T0.3 — 디렉토리 스켈레톤 (deploy/{kind,helm/{api,litellm,vllm,monitoring},monitoring,grafana}, docker/{api,litellm,vllm}, src/api, scripts, docs)
 - ✅ T0.2 — `.gitignore` 작성 (Python, K8s, secrets, IDE, OS)
 - ✅ T0.1 — 초기 세팅 브랜치 확보 (`feat/settings`로 대체, 이름만 다르고 역할 동일)
 
@@ -51,6 +52,7 @@ _없음_
 
 - 브랜치명 `feat/settings` 유지 (계획서는 `chore/initial-setup`). 이름보다 진도 우선.
 - `/new-branch` 슬래시 커맨드 재생성 스킵 — 사용자가 브랜치 직접 만들기로 함.
+- **아키텍처 변경: FastAPI 서비스 레이어 추가** (2026-08-08). PII·auth·라우팅 결정 = FastAPI, LLM 어댑터 = LiteLLM으로 계층 분리. Day 1부터 2-service 배포. PR 1 task 12→16개, 총 48→52.
 
 ---
 

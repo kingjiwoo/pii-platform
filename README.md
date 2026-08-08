@@ -18,19 +18,28 @@
 [Client / 데모 스크립트]
         │
         ▼
-┌─────────────────────────────┐
-│  LiteLLM Gateway (K8s)      │
-│  - 민감도 판별 (PII 탐지)    │
-│  - 라우팅 결정              │
-│  - BYOK/인증, 비용 기록      │
-└───────┬─────────────┬───────┘
-        │ PII 있음     │ PII 없음
-        ▼             ▼
-┌──────────────┐   ┌──────────────────┐
-│ vLLM (K8s,    │   │ 상용 API          │
-│ CPU, 소형모델)│   │ (OpenAI/Anthropic)│
-│ = 온프레 처리 │   │ = 고품질 처리     │
-└──────────────┘   └──────────────────┘
+┌────────────────────────────────┐
+│  FastAPI Service (K8s)          │  ← BFF / 서비스 레이어
+│  · JWT 인증                     │
+│  · PII 감지 + 마스킹            │
+│  · 라우팅 결정 (model_name)     │
+│  · 요청 로깅·메트릭             │
+└────────────────┬───────────────┘
+                 │ model_name 명시 후 forward
+                 ▼
+┌────────────────────────────────┐
+│  LiteLLM Gateway (K8s)          │  ← 순수 LLM 라우팅
+│  · 모델 → 백엔드 매핑            │
+│  · retry / fallback             │
+│  · cost tracking                │
+└───────┬──────────────────┬─────┘
+        │ vllm-qwen         │ gpt-4o-mini
+        ▼                   ▼
+┌──────────────┐    ┌──────────────────┐
+│ vLLM (K8s,    │    │ 상용 API          │
+│ CPU, 소형)    │    │ (OpenAI/Anthropic)│
+│ = 온프레 처리 │    │ = 고품질 처리      │
+└──────────────┘    └──────────────────┘
         │
         ▼
 [Prometheus / Grafana]
@@ -40,18 +49,21 @@
   · vLLM KV캐시 사용률·throughput
 ```
 
+> **계층 분리:** FastAPI가 도메인 로직 (PII·auth·라우팅 결정), LiteLLM은 순수 LLM 어댑터. 관심사 분리로 각 계층의 확장 자유 확보.
+
 ## 기술 스택 & 도메인 정당성
 
 | 기술 | 왜 있는가 |
 |---|---|
-| LiteLLM 게이트웨이 | 민감도 기반 **라우팅 두뇌** |
+| **FastAPI Service** | **서비스 레이어 / BFF** — PII·auth·라우팅 결정 등 도메인 로직 응집 |
+| LiteLLM 게이트웨이 | 순수 LLM 어댑터 — model_name → 실제 백엔드 매핑, retry/fallback, cost tracking |
 | **vLLM on K8s (CPU, 소형 모델)** | 민감정보를 **밖으로 안 보내고** 처리하는 온프레 백엔드 |
-| PII 탐지 노드 | 라우팅 **결정 로직** (한국어 정규식 + 옵션: Presidio) |
+| PII 탐지 | 라우팅 **결정 로직** (한국어 정규식 + 옵션: Presidio) |
 | BYOK / JWT 인증 | 팀·클라이언트별 접근 통제 |
 | Prometheus / Grafana | **SLA·비용** 관측, 민감/비민감 트래픽 분리 |
 | Kubernetes + HPA | 운영·스케일·self-healing |
 
-**주요 스택:** `kind`, `Helm`, `kubectl`, LiteLLM, vLLM (CPU), FastAPI, Prometheus, Grafana (kube-prometheus-stack), Docker
+**주요 스택:** `kind`, `Helm`, `kubectl`, FastAPI, LiteLLM, vLLM (CPU), Prometheus, Grafana (kube-prometheus-stack), Docker
 
 ## 데모 시나리오
 
