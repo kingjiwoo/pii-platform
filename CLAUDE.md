@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `7 / 52` task 완료 (13%)
+**전체:** `10 / 52` task 완료 (19%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
-| PR 0 | `feat/settings` (원래 계획: chore/initial-setup) | 7/8 | ⏳ 진행중 (T0.8 = 첫 PR만 남음) |
-| PR 1 ⭐ | `feat/day1-fastapi-litellm-on-kind` | 0/16 | 🔒 잠김 (PR 0 후) |
+| PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
+| PR 1 ⭐ | `feat/gateway` | 2/16 | ⏳ 진행중 |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 0 마무리. 다음 할 일 = **T0.8** (첫 PR — 원격 push + PR 생성 + 셀프 머지).
+**현재 위치:** PR 1 진행중. T1.1·T1.2 완료. 다음 = T1.3 (LiteLLM config.yaml).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,19 +44,18 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ **T1.2** — `deploy/kind/kind-config.yaml` (control-plane 1개, 80/443 hostPort, `ingress-ready=true` 라벨)
+- ✅ **T1.1** — kind 도구 설치 (`kind v0.32.0`, `helm v4.2.3`) + 개념 학습 문서 [[02-개념-PR1-1단계-kind클러스터]]
+- ✅ T0.8 — 첫 PR 머지 완료 (PR #1: feat/settings → develop, 머지 커밋 `4656a2b`) 🎉 PR 0 종료
 - ✅ T0.7 — 커밋 컨벤션 Conventional Commits 채택 + CLAUDE.md 반영
 - ✅ T0.6 — `docs/architecture.svg` 옵시디언에서 복사 (3.3KB)
-- ✅ T0.5 — `Makefile` 뼈대 (help/kind/build/load/install/uninstall/deploy/pf/logs/smoke, `##@` 섹션 헤더 + `##` 자동 도움말)
-- ✅ T0.4 — `.env.example` (OPENAI/ANTHROPIC/LITELLM_MASTER_KEY 플레이스홀더) + `.editorconfig` (YAML 2sp, Python 4sp, Makefile tab, LF)
-- ✅ T0.3 — 디렉토리 스켈레톤 (deploy/{kind,helm/{api,litellm,vllm,monitoring},monitoring,grafana}, docker/{api,litellm,vllm}, src/api, scripts, docs)
-- ✅ T0.2 — `.gitignore` 작성 (Python, K8s, secrets, IDE, OS)
-- ✅ T0.1 — 초기 세팅 브랜치 확보 (`feat/settings`로 대체, 이름만 다르고 역할 동일)
 
 ### 결정·트러블 로그
 
 - 브랜치명 `feat/settings` 유지 (계획서는 `chore/initial-setup`). 이름보다 진도 우선.
 - `/new-branch` 슬래시 커맨드 재생성 스킵 — 사용자가 브랜치 직접 만들기로 함.
 - **아키텍처 변경: FastAPI 서비스 레이어 추가** (2026-08-08). PII·auth·라우팅 결정 = FastAPI, LLM 어댑터 = LiteLLM으로 계층 분리. Day 1부터 2-service 배포. PR 1 task 12→16개, 총 48→52.
+- **프론트엔드(Next.js) 판단 보류** (2026-08-08). 사용자 편의성·협업능력 어필 관점에서 재검토했으나 PR 1~5 완료 후 시간·필요성 재평가하기로. 현재 계획서 §12 결정(프론트 X) 유지, 대신 OpenAPI 문서/결정 로그/벤치마크로 협업능력·진정성 신호 대체.
 
 ---
 
