@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `17 / 52` task 완료 (33%)
+**전체:** `18 / 52` task 완료 (35%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
-| PR 1 ⭐ | `feat/gateway` | 9/16 | ⏳ 진행중 |
+| PR 1 ⭐ | `feat/gateway` | 10/16 | ⏳ 진행중 |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 1 진행중. T1.1~T1.9 완료. 다음 = T1.10 (helm install + 스모크 테스트).
+**현재 위치:** PR 1 진행중. T1.1~T1.10 완료. **뱅크 K8s 필수요건 1차 확보 🎯** 다음 = T1.11 (kubectl 디버깅 4종 학습).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,7 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ **T1.10** 🎉 — `helm install gateway` 성공 → curl 스모크 200 응답 (`{"content":"Hello!"}`). 트래픽 전체 경로 검증. `scripts/smoke-gateway.sh` 재사용 스크립트 확보
 - ✅ **T1.9** — ingress-nginx Controller 설치 완료 + `values.yaml`에서 Ingress 활성화 (`gateway.localtest.me`, `pathType: Prefix`)
 - ✅ **T1.8** — ConfigMap + Secret 템플릿 추가, Deployment에 envFrom·volumeMount·checksum 트릭 적용. `helm template` 렌더링 검증 완료
 - ✅ **T1.7** — `values.yaml` 우리 값으로 조정 (`pii-litellm:dev`, port 4000, `/health` probe). `helm template`로 렌더링 검증 완료
@@ -62,6 +63,10 @@ _없음_
 - **아키텍처 변경: FastAPI 서비스 레이어 추가** (2026-08-08). PII·auth·라우팅 결정 = FastAPI, LLM 어댑터 = LiteLLM으로 계층 분리. Day 1부터 2-service 배포. PR 1 task 12→16개, 총 48→52.
 - **프론트엔드(Next.js) 판단 보류** (2026-08-08). 사용자 편의성·협업능력 어필 관점에서 재검토했으나 PR 1~5 완료 후 시간·필요성 재평가하기로. 현재 계획서 §12 결정(프론트 X) 유지, 대신 OpenAPI 문서/결정 로그/벤치마크로 협업능력·진정성 신호 대체.
 - **T1.3 스코프 축소: Anthropic 제외, OpenAI(gpt-4o-mini)만** (2026-08-08). Day 1 스코프 최소화. 필요시 model_list에 추가만 하면 되므로 확장 비용 저렴. `LITELLM_MASTER_KEY=sk-1234` (LiteLLM 커뮤니티 표준 dev 기본값).
+- **T1.10 트러블슈팅 3건** (2026-08-09):
+  1. **LiteLLM `/health`가 master_key 인증 요구** → K8s probe가 401 → CrashLoopBackOff. 해결: `/health/liveliness`, `/health/readiness` (인증 없는 별도 엔드포인트)로 변경.
+  2. **shell `$OPENAI_API_KEY` 미로드 상태에서 helm upgrade** → Secret에 빈값 → OpenAI 401. 해결: `set -a; source .env; set +a`로 재로드 후 helm upgrade.
+  3. **OpenAI 크레딧 소진** → 429 RateLimitError. 해결: billing 페이지에서 충전.
 
 ---
 
