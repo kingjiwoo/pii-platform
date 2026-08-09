@@ -94,8 +94,67 @@
 ## 상태
 
 - [x] 계획 완료
-- [ ] Day 1 — 게이트웨이 K8s 배포
-- [ ] Day 2 — vLLM 배포
+- [x] **Day 1 — 게이트웨이 K8s 배포** ✅ (PR #2 머지, 2026-08-09) → [빠른 시작](#빠른-시작-day-1-완성분)
+- [ ] Day 2 — vLLM 배포 (진행 중, `feat/vllm`)
 - [ ] Day 3 — 라우팅
 - [ ] Day 4 — 관측성
 - [ ] Day 5 — 운영·문서화
+
+## 빠른 시작 (Day 1 완성분)
+
+FastAPI + LiteLLM 2-service 하이브리드 게이트웨이를 로컬 kind 클러스터에 배포하고 스모크 테스트.
+
+### 사전 요구
+
+- macOS + Docker Desktop 실행 중
+- `brew install kind kubectl helm`
+- OpenAI API 키 ([발급](https://platform.openai.com/api-keys))
+
+### 순서
+
+```bash
+# 1. 리포 세팅
+git clone https://github.com/kingjiwoo/pii-platform && cd pii-platform
+cp .env.example .env
+# .env 파일 열어서 OPENAI_API_KEY=sk-... 채우기
+
+# 2. kind 클러스터 생성
+kind create cluster --config deploy/kind/kind-config.yaml
+
+# 3. ingress-nginx Controller 설치
+kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+
+# 4. 이미지 빌드 + kind 노드로 로드
+docker build -t pii-litellm:dev docker/litellm/
+docker build -f docker/api/Dockerfile -t pii-api:dev .
+kind load docker-image pii-litellm:dev --name pii-platform
+kind load docker-image pii-api:dev --name pii-platform
+
+# 5. 환경변수 로드 후 Helm 배포
+set -a; source .env; set +a
+
+helm install gateway ./deploy/helm/litellm \
+  --namespace pii --create-namespace \
+  --set secrets.OPENAI_API_KEY=$OPENAI_API_KEY
+
+helm install gateway-api ./deploy/helm/api --namespace pii
+
+# 6. Pod Ready 대기
+kubectl rollout status deployment/gateway-litellm -n pii
+kubectl rollout status deployment/gateway-api -n pii
+
+# 7. End-to-end 스모크 테스트 (Ingress → FastAPI → LiteLLM → OpenAI)
+./scripts/smoke-api.sh
+# → ✅ SUCCESS — 4-hop 정상
+```
+
+### 검증되는 것
+
+- ✅ 2-service Helm chart 각각 배포 (Deployment/Service/ConfigMap/Secret/Ingress)
+- ✅ `checksum/config` annotation으로 ConfigMap 변경 자동 반영
+- ✅ 외부 진입점은 FastAPI 하나로 통일, LiteLLM은 내부 전용 (ClusterIP)
+- ✅ Ingress-nginx가 host 기반 라우팅 (`api.localtest.me` → gateway-api Service)

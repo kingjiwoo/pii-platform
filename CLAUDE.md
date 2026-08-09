@@ -25,13 +25,13 @@
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
-| PR 1 ⭐ | `feat/gateway` | 16/16 | 🎉 코딩 완료, 머지 대기 |
-| PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
+| PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
+| PR 2 | `feat/vllm` (계획서 원안 `feat/day2-vllm-on-k8s`, 실용 축약) | 0/7 | ⏳ 진행중 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 1 전체 완료 🎯 (T1.1~T1.16). 뱅크 K8s 필수요건 확보. 다음 = 커밋·(선택) 머지 → PR 2 (vLLM on K8s) 시작.
+**현재 위치:** PR 2 시작 (`feat/vllm` 브랜치). 다음 = T2.1 (vLLM 개념 학습).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
