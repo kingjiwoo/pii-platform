@@ -76,6 +76,7 @@ _없음_
   (2) 재활용 자산 BYOK/JWT/agents가 front edge에 자연스럽게 매핑
   (3) 뱅크 맥락에서 표준 마이크로서비스 패턴 선호 (custom hook은 감사·유지보수 우려)
   Day 1 forwarder는 PR 3의 라우팅 로직 자리를 미리 확보하는 용도. 면접 방어 자산으로 이 검토 자체를 활용.
+- **로컬 FastAPI 테스트 IPv4/IPv6 이슈** (2026-08-09). Docker Desktop이 IPv6 `[::1]:8000` 잡고 있으면 macOS `localhost` 해석 시 IPv6 우선 → curl이 우리 uvicorn(IPv4)이 아닌 Docker Desktop API로 감. 해결: `curl 127.0.0.1:8000`로 명시 또는 `uvicorn --host 0.0.0.0`. Docker/K8s에선 격리돼서 문제 없음.
 
 ---
 
