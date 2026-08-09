@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `22 / 52` task 완료 (42%)
+**전체:** `24 / 52` task 완료 (46%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
-| PR 1 ⭐ | `feat/gateway` | 14/16 | ⏳ 진행중 |
+| PR 1 ⭐ | `feat/gateway` | 16/16 | 🎉 코딩 완료, 머지 대기 |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 1 진행중. T1.1~T1.14 완료 (FastAPI stub 로컬 검증 + Docker 이미지 빌드/kind load). 다음 = T1.15 (FastAPI Helm chart).
+**현재 위치:** PR 1 전체 완료 🎯 (T1.1~T1.16). 뱅크 K8s 필수요건 확보. 다음 = 커밋·(선택) 머지 → PR 2 (vLLM on K8s) 시작.
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,8 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ **T1.16** — end-to-end 스모크: `curl api.localtest.me → FastAPI → LiteLLM → OpenAI` 4-hop 200 응답 확인 🎯 PR 1 종료
+- ✅ **T1.15** — FastAPI Helm chart (`deploy/helm/api/`) 생성. ConfigMap(LITELLM_URL), Secret(LITELLM_MASTER_KEY), envFrom, checksum, Ingress(`api.localtest.me`). LiteLLM Ingress 비활성 → 내부 전용화. `helm install gateway-api` 배포 성공
 - ✅ **T1.14** — `docker/api/Dockerfile` (python:3.11-slim, layer-cached deps install, `--host 0.0.0.0 --port 8000`) + build `pii-api:dev` + kind load 완료
 - ✅ **T1.13** — `src/api/main.py` (FastAPI stub: lifespan-managed httpx client, `/health/liveliness`, `/health/readiness`, `/v1/chat/completions` forwarder) + `requirements.txt` (fastapi 0.115, uvicorn 0.30, httpx 0.27) + 로컬 uvicorn 3-hop 검증 (IPv4/IPv6 함정 발견·해결)
 - ✅ **T1.12** — LiteLLM 단독 스모크 완료 커밋 (`feat(k8s): deploy litellm gateway and verify end-to-end`)
