@@ -1,4 +1,4 @@
-# Default values for litellm.
+# Default values for api.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,7 +7,7 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: pii-litellm
+  repository: pii-api
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
@@ -54,17 +54,17 @@ service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-  port: 4000
+  port: 8000
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
-  enabled: false
+  enabled: true
   className: nginx
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: gateway.localtest.me
+    - host: api.localtest.me
       paths:
         - path: /
           pathType: Prefix
@@ -160,20 +160,11 @@ tolerations: []
 
 affinity: {}
 
-# LiteLLM proxy config (rendered into ConfigMap, mounted at /app/config.yaml)
+# FastAPI env vars (rendered into ConfigMap, injected via envFrom)
 config:
-  model_list:
-    - model_name: gpt-4o-mini
-      litellm_params:
-        model: openai/gpt-4o-mini
-        api_key: os.environ/OPENAI_API_KEY
-  general_settings:
-    master_key: os.environ/LITELLM_MASTER_KEY
+  LITELLM_URL: "http://gateway-litellm.pii.svc.cluster.local:4000"
 
-# Secret values (K8s auto-base64-encodes stringData at apply time)
-# NOTE: OPENAI_API_KEY must be overridden — do NOT commit real key.
-# Override via: helm install ... --set secrets.OPENAI_API_KEY=sk-...
-#           or: helm install ... -f local-secrets.yaml (gitignored)
+# Secret env vars (K8s auto-base64-encodes stringData at apply time)
+# LITELLM_MASTER_KEY must match the litellm chart's secret value.
 secrets:
-  OPENAI_API_KEY: "REPLACE_ME"
   LITELLM_MASTER_KEY: "sk-1234"
