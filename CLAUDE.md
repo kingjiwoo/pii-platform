@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `7 / 52` task 완료 (13%)
+**전체:** `24 / 52` task 완료 (46%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
-| PR 0 | `feat/settings` (원래 계획: chore/initial-setup) | 7/8 | ⏳ 진행중 (T0.8 = 첫 PR만 남음) |
-| PR 1 ⭐ | `feat/day1-fastapi-litellm-on-kind` | 0/16 | 🔒 잠김 (PR 0 후) |
+| PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
+| PR 1 ⭐ | `feat/gateway` | 16/16 | 🎉 코딩 완료, 머지 대기 |
 | PR 2 | `feat/day2-vllm-on-k8s` | 0/7 | 🔒 잠김 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 0 마무리. 다음 할 일 = **T0.8** (첫 PR — 원격 push + PR 생성 + 셀프 머지).
+**현재 위치:** PR 1 전체 완료 🎯 (T1.1~T1.16). 뱅크 K8s 필수요건 확보. 다음 = 커밋·(선택) 머지 → PR 2 (vLLM on K8s) 시작.
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,19 +44,42 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
-- ✅ T0.7 — 커밋 컨벤션 Conventional Commits 채택 + CLAUDE.md 반영
-- ✅ T0.6 — `docs/architecture.svg` 옵시디언에서 복사 (3.3KB)
-- ✅ T0.5 — `Makefile` 뼈대 (help/kind/build/load/install/uninstall/deploy/pf/logs/smoke, `##@` 섹션 헤더 + `##` 자동 도움말)
-- ✅ T0.4 — `.env.example` (OPENAI/ANTHROPIC/LITELLM_MASTER_KEY 플레이스홀더) + `.editorconfig` (YAML 2sp, Python 4sp, Makefile tab, LF)
-- ✅ T0.3 — 디렉토리 스켈레톤 (deploy/{kind,helm/{api,litellm,vllm,monitoring},monitoring,grafana}, docker/{api,litellm,vllm}, src/api, scripts, docs)
-- ✅ T0.2 — `.gitignore` 작성 (Python, K8s, secrets, IDE, OS)
-- ✅ T0.1 — 초기 세팅 브랜치 확보 (`feat/settings`로 대체, 이름만 다르고 역할 동일)
+- ✅ **T1.16** — end-to-end 스모크: `curl api.localtest.me → FastAPI → LiteLLM → OpenAI` 4-hop 200 응답 확인 🎯 PR 1 종료
+- ✅ **T1.15** — FastAPI Helm chart (`deploy/helm/api/`) 생성. ConfigMap(LITELLM_URL), Secret(LITELLM_MASTER_KEY), envFrom, checksum, Ingress(`api.localtest.me`). LiteLLM Ingress 비활성 → 내부 전용화. `helm install gateway-api` 배포 성공
+- ✅ **T1.14** — `docker/api/Dockerfile` (python:3.11-slim, layer-cached deps install, `--host 0.0.0.0 --port 8000`) + build `pii-api:dev` + kind load 완료
+- ✅ **T1.13** — `src/api/main.py` (FastAPI stub: lifespan-managed httpx client, `/health/liveliness`, `/health/readiness`, `/v1/chat/completions` forwarder) + `requirements.txt` (fastapi 0.115, uvicorn 0.30, httpx 0.27) + 로컬 uvicorn 3-hop 검증 (IPv4/IPv6 함정 발견·해결)
+- ✅ **T1.12** — LiteLLM 단독 스모크 완료 커밋 (`feat(k8s): deploy litellm gateway and verify end-to-end`)
+- ✅ **T1.11** — kubectl 디버깅 4종 (`get -w`, `describe`, `logs`, `exec`) 학습. T1.10 트러블슈팅 실전 경험 문서화
+- ✅ **T1.10** 🎉 — `helm install gateway` 성공 → curl 스모크 200 응답 (`{"content":"Hello!"}`). 트래픽 전체 경로 검증. `scripts/smoke-gateway.sh` 재사용 스크립트 확보
+- ✅ **T1.9** — ingress-nginx Controller 설치 완료 + `values.yaml`에서 Ingress 활성화 (`gateway.localtest.me`, `pathType: Prefix`)
+- ✅ **T1.8** — ConfigMap + Secret 템플릿 추가, Deployment에 envFrom·volumeMount·checksum 트릭 적용. `helm template` 렌더링 검증 완료
+- ✅ **T1.7** — `values.yaml` 우리 값으로 조정 (`pii-litellm:dev`, port 4000, `/health` probe). `helm template`로 렌더링 검증 완료
+- ✅ **T1.6** — `helm create deploy/helm/litellm` + 생성 파일 순회 학습 (Chart.yaml, values.yaml, deployment.yaml)
+- ✅ **T1.5** — 이미지 빌드 `pii-litellm:dev` (385MB) + `kind load` 완료. 노드 containerd 캐시에서 확인
+- ✅ **T1.4** — `docker/litellm/Dockerfile` (베이스 `main-latest` + config COPY + `--config /app/config.yaml --port 4000`)
+- ✅ **T1.3** — `docker/litellm/config.yaml` (gpt-4o-mini만, `os.environ/*`로 API key·master key 참조)
+- ✅ **T1.2** — `deploy/kind/kind-config.yaml` (control-plane 1개, 80/443 hostPort, `ingress-ready=true` 라벨) + 스모크 검증
+- ✅ **T1.1** — kind 도구 설치 (`kind v0.32.0`, `helm v4.2.3`) + 개념 학습 문서
+- ✅ T0.8 — 첫 PR 머지 완료 (PR #1: feat/settings → develop, 머지 커밋 `4656a2b`) 🎉 PR 0 종료
 
 ### 결정·트러블 로그
 
 - 브랜치명 `feat/settings` 유지 (계획서는 `chore/initial-setup`). 이름보다 진도 우선.
 - `/new-branch` 슬래시 커맨드 재생성 스킵 — 사용자가 브랜치 직접 만들기로 함.
 - **아키텍처 변경: FastAPI 서비스 레이어 추가** (2026-08-08). PII·auth·라우팅 결정 = FastAPI, LLM 어댑터 = LiteLLM으로 계층 분리. Day 1부터 2-service 배포. PR 1 task 12→16개, 총 48→52.
+- **프론트엔드(Next.js) 판단 보류** (2026-08-08). 사용자 편의성·협업능력 어필 관점에서 재검토했으나 PR 1~5 완료 후 시간·필요성 재평가하기로. 현재 계획서 §12 결정(프론트 X) 유지, 대신 OpenAPI 문서/결정 로그/벤치마크로 협업능력·진정성 신호 대체.
+- **T1.3 스코프 축소: Anthropic 제외, OpenAI(gpt-4o-mini)만** (2026-08-08). Day 1 스코프 최소화. 필요시 model_list에 추가만 하면 되므로 확장 비용 저렴. `LITELLM_MASTER_KEY=sk-1234` (LiteLLM 커뮤니티 표준 dev 기본값).
+- **T1.10 트러블슈팅 3건** (2026-08-09):
+  1. **LiteLLM `/health`가 master_key 인증 요구** → K8s probe가 401 → CrashLoopBackOff. 해결: `/health/liveliness`, `/health/readiness` (인증 없는 별도 엔드포인트)로 변경.
+  2. **shell `$OPENAI_API_KEY` 미로드 상태에서 helm upgrade** → Secret에 빈값 → OpenAI 401. 해결: `set -a; source .env; set +a`로 재로드 후 helm upgrade.
+  3. **OpenAI 크레딧 소진** → 429 RateLimitError. 해결: billing 페이지에서 충전.
+- **아키텍처 트레이드오프 검토: Front-FastAPI 유지** (2026-08-09). LiteLLM을 gateway로 앞에 두고 FastAPI를 callback 대상으로 두는 대안 검토. 결론: Front-FastAPI 유지.
+  이유:
+  (1) 도메인 로직(PII)을 순수 Python 함수로 테스트·이식 자유 확보 (callback 방식은 LiteLLM 내부 계약에 종속)
+  (2) 재활용 자산 BYOK/JWT/agents가 front edge에 자연스럽게 매핑
+  (3) 뱅크 맥락에서 표준 마이크로서비스 패턴 선호 (custom hook은 감사·유지보수 우려)
+  Day 1 forwarder는 PR 3의 라우팅 로직 자리를 미리 확보하는 용도. 면접 방어 자산으로 이 검토 자체를 활용.
+- **로컬 FastAPI 테스트 IPv4/IPv6 이슈** (2026-08-09). Docker Desktop이 IPv6 `[::1]:8000` 잡고 있으면 macOS `localhost` 해석 시 IPv6 우선 → curl이 우리 uvicorn(IPv4)이 아닌 Docker Desktop API로 감. 해결: `curl 127.0.0.1:8000`로 명시 또는 `uvicorn --host 0.0.0.0`. Docker/K8s에선 격리돼서 문제 없음.
 
 ---
 
