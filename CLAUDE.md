@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `31 / 52` task 완료 (60%)
+**전체:** `38 / 52` task 완료 (73%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
 | PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
-| PR 2 | `feat/vllm` (계획서 원안 `feat/day2-vllm-on-k8s`, 실용 축약) | 7/7 | 🎉 코딩 완료, 머지 대기 |
-| PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
+| PR 2 | `feat/vllm` → develop (PR #3 머지 완료, `1b4e0e6`) | 7/7 | ✅ 완료 🎉 |
+| PR 3 | `feat/routing` (계획서 원안 `feat/day3-sensitivity-routing`) | 7/8 | ⏳ 진행중 (커밋+PR만 남음) |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 2 전체 완료 🎯 (T2.1~T2.7). vLLM CPU 서빙이 kind 안에서 in-cluster 응답 확인. 다음 = 커밋·머지 → PR 3 (PII 라우팅) 시작.
+**현재 위치:** PR 3 진행중 (`feat/routing`). T3.1~T3.7 완료 🎯 — **하이브리드 라우팅 데모 성공** (PII→vllm-qwen, 일반→gpt-4o-mini). 다음 = T3.8 (커밋+PR).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)

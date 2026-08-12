@@ -167,6 +167,13 @@ config:
       litellm_params:
         model: openai/gpt-4o-mini
         api_key: os.environ/OPENAI_API_KEY
+    # On-prem vLLM backend for PII requests.
+    # `openai/` prefix tells LiteLLM to use its OpenAI-compatible adapter.
+    - model_name: vllm-qwen
+      litellm_params:
+        model: openai/vllm-qwen
+        api_base: http://vllm.pii.svc.cluster.local:8000/v1
+        api_key: dummy    # vLLM has no auth; LiteLLM still requires the key field
   general_settings:
     master_key: os.environ/LITELLM_MASTER_KEY
 
