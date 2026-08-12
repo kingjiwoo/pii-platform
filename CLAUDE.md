@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `35 / 52` task 완료 (67%)
+**전체:** `38 / 52` task 완료 (73%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
 | PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
 | PR 2 | `feat/vllm` → develop (PR #3 머지 완료, `1b4e0e6`) | 7/7 | ✅ 완료 🎉 |
-| PR 3 | `feat/routing` (계획서 원안 `feat/day3-sensitivity-routing`) | 4/8 | ⏳ 진행중 |
+| PR 3 | `feat/routing` (계획서 원안 `feat/day3-sensitivity-routing`) | 7/8 | ⏳ 진행중 (커밋+PR만 남음) |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 3 진행중 (`feat/routing`). T3.1~T3.3 + T3.5 완료 — C+ 레이어 (pii/masking/routing/clients/handlers/models) 구축, PipelineHandler 조립. 다음 = T3.4 (LiteLLM에 vLLM 등록) + T3.6 (재빌드+upgrade) + T3.7 (데모 스크립트).
+**현재 위치:** PR 3 진행중 (`feat/routing`). T3.1~T3.7 완료 🎯 — **하이브리드 라우팅 데모 성공** (PII→vllm-qwen, 일반→gpt-4o-mini). 다음 = T3.8 (커밋+PR).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
