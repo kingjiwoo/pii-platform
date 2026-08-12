@@ -20,18 +20,18 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `24 / 52` task 완료 (46%)
+**전체:** `31 / 52` task 완료 (60%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
 | PR 0 | `feat/settings` → develop (PR #1 머지 완료) | 8/8 | ✅ 완료 |
 | PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
-| PR 2 | `feat/vllm` (계획서 원안 `feat/day2-vllm-on-k8s`, 실용 축약) | 0/7 | ⏳ 진행중 |
+| PR 2 | `feat/vllm` (계획서 원안 `feat/day2-vllm-on-k8s`, 실용 축약) | 7/7 | 🎉 코딩 완료, 머지 대기 |
 | PR 3 | `feat/day3-sensitivity-routing` | 0/8 | 🔒 잠김 |
 | PR 4 | `feat/day4-observability` | 0/6 | 🔒 잠김 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 2 시작 (`feat/vllm` 브랜치). 다음 = T2.1 (vLLM 개념 학습).
+**현재 위치:** PR 2 전체 완료 🎯 (T2.1~T2.7). vLLM CPU 서빙이 kind 안에서 in-cluster 응답 확인. 다음 = 커밋·머지 → PR 3 (PII 라우팅) 시작.
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -44,6 +44,11 @@ _없음_
 
 ### 최근 완료 (최대 5개)
 
+- ✅ **T2.7** — In-cluster 스모크 성공. `kubectl run tester --image=curlimages/curl → http://vllm:8000/v1/completions` → Qwen 응답 확인. 🎯 PR 2 종료
+- ✅ **T2.4~T2.6** — `deploy/helm/vllm/` Helm chart 생성. `enableServiceLinks: false` (VLLM_PORT 충돌 회피), `/dev/shm` 2Gi emptyDir 마운트 (multiproc IPC), `arch-specific tag (latest-arm64)` (multi-arch kind load 이슈 회피), readinessProbe `initialDelaySeconds: 180`, resources 3~5Gi
+- ✅ **T2.3** — vLLM CPU 이미지 로컬 검증 완료. `vllm/vllm-openai-cpu:latest` (arm64, 820MB) + Qwen2.5-0.5B-Instruct 로 `curl → text 응답` 확인. 튜닝: `--gpu-memory-utilization 0.3`, Docker Desktop 메모리 12GB 필수
+- ✅ **T2.2** — 모델 = `Qwen/Qwen2.5-0.5B-Instruct` (Apache 2.0, CPU 서빙 가능한 최소 사이즈, 한국어 지원, vLLM 공식 지원)
+- ✅ **T2.1** — vLLM 개념 (PagedAttention, continuous batching) — 로컬 검증 과정에서 실질 학습됨
 - ✅ **T1.16** — end-to-end 스모크: `curl api.localtest.me → FastAPI → LiteLLM → OpenAI` 4-hop 200 응답 확인 🎯 PR 1 종료
 - ✅ **T1.15** — FastAPI Helm chart (`deploy/helm/api/`) 생성. ConfigMap(LITELLM_URL), Secret(LITELLM_MASTER_KEY), envFrom, checksum, Ingress(`api.localtest.me`). LiteLLM Ingress 비활성 → 내부 전용화. `helm install gateway-api` 배포 성공
 - ✅ **T1.14** — `docker/api/Dockerfile` (python:3.11-slim, layer-cached deps install, `--host 0.0.0.0 --port 8000`) + build `pii-api:dev` + kind load 완료
@@ -69,6 +74,11 @@ _없음_
 - **아키텍처 변경: FastAPI 서비스 레이어 추가** (2026-08-08). PII·auth·라우팅 결정 = FastAPI, LLM 어댑터 = LiteLLM으로 계층 분리. Day 1부터 2-service 배포. PR 1 task 12→16개, 총 48→52.
 - **프론트엔드(Next.js) 판단 보류** (2026-08-08). 사용자 편의성·협업능력 어필 관점에서 재검토했으나 PR 1~5 완료 후 시간·필요성 재평가하기로. 현재 계획서 §12 결정(프론트 X) 유지, 대신 OpenAPI 문서/결정 로그/벤치마크로 협업능력·진정성 신호 대체.
 - **T1.3 스코프 축소: Anthropic 제외, OpenAI(gpt-4o-mini)만** (2026-08-08). Day 1 스코프 최소화. 필요시 model_list에 추가만 하면 되므로 확장 비용 저렴. `LITELLM_MASTER_KEY=sk-1234` (LiteLLM 커뮤니티 표준 dev 기본값).
+- **T2.3 트러블슈팅 (Docker Desktop 메모리)** (2026-08-11). vLLM CPU가 OOM 킬 → `Available RAM: 1.45 GiB` 로그 확인 → Docker Desktop 총 메모리 7.65GB에서 12GB로 확장 후 성공. Docker Desktop GUI가 트레이 모드로만 실행됐던 문제: `--reason=open-tray`로 시작됐음 → 원인 진단 후 UI 프로세스 재시작으로 GUI 복구. Daemon도 함께 재시작되어 kind 클러스터 1분 다운타임 있었으나 Pod들 자동 복구 (RESTARTS +2).
+- **T2.4~T2.7 K8s-vLLM 함정 3건** (2026-08-12):
+  1. **`VLLM_PORT` 자동 주입 충돌** — Service 이름 `vllm` → K8s가 `VLLM_PORT=tcp://<IP>:8000` env 자동 주입 → vLLM이 int로 파싱하려다 크래시. 해결: Pod `spec.enableServiceLinks: false`
+  2. **`/dev/shm` 64MB 부족** — K8s Pod 기본 shm이 vLLM multiproc executor(~160MB) 부족. 해결: `emptyDir { medium: Memory, sizeLimit: 2Gi }` 를 `/dev/shm`에 마운트
+  3. **multi-arch kind load 실패** — `vllm/vllm-openai-cpu:latest`(multi-arch) → `ctr images import` content digest not found. 해결: arch-specific 태그 (`latest-arm64`) 사용
 - **T1.10 트러블슈팅 3건** (2026-08-09):
   1. **LiteLLM `/health`가 master_key 인증 요구** → K8s probe가 401 → CrashLoopBackOff. 해결: `/health/liveliness`, `/health/readiness` (인증 없는 별도 엔드포인트)로 변경.
   2. **shell `$OPENAI_API_KEY` 미로드 상태에서 helm upgrade** → Secret에 빈값 → OpenAI 401. 해결: `set -a; source .env; set +a`로 재로드 후 helm upgrade.
