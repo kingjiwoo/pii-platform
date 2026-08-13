@@ -17,6 +17,7 @@ from contextlib import asynccontextmanager
 
 import httpx
 from fastapi import FastAPI, HTTPException, Request
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .clients.litellm import LiteLLMClient
 from .handlers.base import Handler
@@ -57,6 +58,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="PII Gateway", lifespan=lifespan)
+
+# Auto-expose /metrics with HTTP standard metrics (requests, latency, size, status).
+# Custom domain metrics live in observability.metrics and are incremented from the handler.
+Instrumentator().instrument(app).expose(app)
 
 
 @app.get("/health/liveliness")

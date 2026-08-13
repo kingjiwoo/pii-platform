@@ -20,7 +20,7 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `39 / 52` task 완료 (75%)
+**전체:** `41 / 52` task 완료 (79%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
@@ -28,10 +28,10 @@
 | PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
 | PR 2 | `feat/vllm` → develop (PR #3 머지 완료, `1b4e0e6`) | 7/7 | ✅ 완료 🎉 |
 | PR 3 | `feat/routing` → develop (PR #4 머지 완료, `16d8b19`) | 8/8 | ✅ 완료 🎉 |
-| PR 4 | `feat/observe` (계획서 원안 `feat/day4-observability`) | 0/6 | ⏳ 진행중 |
+| PR 4 | `feat/observe` (계획서 원안 `feat/day4-observability`) | 2/6 | ⏳ 진행중 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 4 진행중 (`feat/observe`). 다음 = T4.1 (kube-prometheus-stack 설치).
+**현재 위치:** PR 4 진행중 (`feat/observe`). T4.1~T4.2 완료 — 관측성 인프라 배포 + FastAPI 커스텀 메트릭 노출 확인. 다음 = T4.3 (ServiceMonitor).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
