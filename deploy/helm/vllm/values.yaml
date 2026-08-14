@@ -164,6 +164,14 @@ tolerations: []
 
 affinity: {}
 
+# ServiceMonitor: Prometheus Operator picks up this CRD and starts scraping /metrics.
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics
+  labels:
+    release: monitoring
+
 # vLLM CLI arguments (passed to container as args)
 # See: https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html
 vllmArgs:

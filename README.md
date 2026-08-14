@@ -95,10 +95,29 @@
 
 - [x] 계획 완료
 - [x] **Day 1 — 게이트웨이 K8s 배포** ✅ (PR #2 머지, 2026-08-09) → [빠른 시작](#빠른-시작-day-1-완성분)
-- [ ] Day 2 — vLLM 배포 (진행 중, `feat/vllm`)
-- [ ] Day 3 — 라우팅
-- [ ] Day 4 — 관측성
+- [x] **Day 2 — vLLM 배포** ✅ (PR #3 머지, 2026-08-12) — CPU 모드로 Qwen2.5-0.5B-Instruct 서빙
+- [x] **Day 3 — 하이브리드 라우팅** ✅ (PR #4 머지, 2026-08-13) — PII → 온프레 vLLM, 일반 → OpenAI
+- [x] **Day 4 — 관측성** ✅ (Prometheus + Grafana) → [대시보드](#관측성-grafana-대시보드)
 - [ ] Day 5 — 운영·문서화
+
+## 관측성 (Grafana 대시보드)
+
+`kube-prometheus-stack` + FastAPI 커스텀 메트릭(`pii_detections_total`, `routing_decisions_total`) + vLLM native 메트릭을 하나의 대시보드에 시각화. Dashboard-as-Code로 `deploy/grafana/hybrid-llm-dashboard.json`에 정의, ConfigMap sidecar로 Grafana에 자동 로드.
+
+![Grafana — Hybrid LLM Gateway](docs/screenshots/grafana-hybrid-llm.png)
+
+**핵심 패널:**
+
+- **Routing rate — PII vs Non-PII** — `sum by (pii_detected) (rate(routing_decisions_total[5m]))` 스택드 뷰. 도메인 스토리 그 자체.
+- **Routing decisions by target model** — vLLM vs OpenAI 누적 비율 (도넛)
+- **PII detections by type** — 어떤 종류의 PII가 자주 감지되는지 (파이)
+- **vLLM active requests / tokens/sec** — 온프레 백엔드 부하·처리량
+
+접속:
+```bash
+kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+# http://localhost:3000/d/hybrid-llm-gateway (admin / admin123)
+```
 
 ## 빠른 시작 (Day 1 완성분)
 

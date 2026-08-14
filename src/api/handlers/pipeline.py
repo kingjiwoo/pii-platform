@@ -3,6 +3,7 @@ from ..clients.litellm import LiteLLMClient
 from ..masking.masker import Masker
 from ..models.chat import ChatRequest, ChatResponse, Message
 from ..models.context import RequestContext
+from ..observability.metrics import pii_detections_total, routing_decisions_total
 from ..pii.detector import Detector
 from ..routing.router import Router
 
@@ -28,6 +29,9 @@ class PipelineHandler:
         # Scan concatenated text so routing sees any PII in any message.
         overall_matches = self.detector.detect(request.text)
 
+        for m in overall_matches:
+            pii_detections_total.labels(pii_type=m.type.value).inc()
+
         # Mask each message independently (offsets are per-message).
         if overall_matches:
             request.messages = [
@@ -39,5 +43,10 @@ class PipelineHandler:
             ]
 
         request.model = self.router.route(overall_matches)
+        routing_decisions_total.labels(
+            target_model=request.model,
+            pii_detected="true" if overall_matches else "false",
+        ).inc()
+
         result = await self.client.chat_completions(request.to_openai_body())
         return ChatResponse(body=result)
