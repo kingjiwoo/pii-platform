@@ -168,3 +168,11 @@ config:
 # LITELLM_MASTER_KEY must match the litellm chart's secret value.
 secrets:
   LITELLM_MASTER_KEY: "sk-1234"
+
+# ServiceMonitor: Prometheus Operator picks up this CRD and starts scraping /metrics.
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics
+  labels:
+    release: monitoring   # optional, kept for convention; T4.1 uses NilUsesHelmValues=false

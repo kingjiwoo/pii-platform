@@ -20,7 +20,7 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `41 / 52` task 완료 (79%)
+**전체:** `42 / 52` task 완료 (81%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
@@ -28,10 +28,10 @@
 | PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
 | PR 2 | `feat/vllm` → develop (PR #3 머지 완료, `1b4e0e6`) | 7/7 | ✅ 완료 🎉 |
 | PR 3 | `feat/routing` → develop (PR #4 머지 완료, `16d8b19`) | 8/8 | ✅ 완료 🎉 |
-| PR 4 | `feat/observe` (계획서 원안 `feat/day4-observability`) | 2/6 | ⏳ 진행중 |
+| PR 4 | `feat/observe` (계획서 원안 `feat/day4-observability`) | 3/6 | ⏳ 진행중 |
 | PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
 
-**현재 위치:** PR 4 진행중 (`feat/observe`). T4.1~T4.2 완료 — 관측성 인프라 배포 + FastAPI 커스텀 메트릭 노출 확인. 다음 = T4.3 (ServiceMonitor).
+**현재 위치:** PR 4 진행중 (`feat/observe`, 3/6). T4.1~T4.3 완료 — Prometheus가 gateway-api·vllm 스크랩 확인, PromQL로 `routing_decisions_total`·`vllm:num_requests_running` 조회 가능. LiteLLM SM은 스킵 (community `/metrics` auth 요구 + 실제 metric 없음). 다음 = T4.4 (Grafana 대시보드).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
