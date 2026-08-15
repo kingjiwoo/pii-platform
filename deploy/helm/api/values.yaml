@@ -133,13 +133,21 @@ readinessProbe:
     path: /health/readiness
     port: http
 
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+# Autoscaling based on request rate (custom metric via prometheus-adapter).
+# See: docs/architecture — Prometheus → prometheus-adapter → custom.metrics.k8s.io → HPA
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  maxReplicas: 5
+  # CPU thresholds omitted — this workload is I/O bound, request rate is the meaningful signal.
+  customMetrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "2"    # scale up when >2 req/s per pod (2m in K8s notation)
 
 # Additional volumes on the output Deployment definition.
 volumes: []

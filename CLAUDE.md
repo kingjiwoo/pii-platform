@@ -20,7 +20,7 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `45 / 52` task 완료 (87%)
+**전체:** `46 / 52` task 완료 (88%)
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
@@ -28,10 +28,10 @@
 | PR 1 ⭐ | `feat/gateway` → develop (PR #2 머지 완료, `57e8da7`) | 16/16 | ✅ 완료 🎉 |
 | PR 2 | `feat/vllm` → develop (PR #3 머지 완료, `1b4e0e6`) | 7/7 | ✅ 완료 🎉 |
 | PR 3 | `feat/routing` → develop (PR #4 머지 완료, `16d8b19`) | 8/8 | ✅ 완료 🎉 |
-| PR 4 | `feat/observe` (계획서 원안 `feat/day4-observability`) | 6/6 | 🎉 코딩 완료, 머지 대기 |
-| PR 5 | `feat/day5-ops-polish` | 0/7 | 🔒 잠김 |
+| PR 4 | `feat/observe` → develop (PR #5 머지 완료, `7059c53`) | 6/6 | ✅ 완료 🎉 |
+| PR 5 | `feat/ops` (계획서 원안 `feat/day5-ops-polish`) | 1/7 | ⏳ 진행중 |
 
-**현재 위치:** PR 4 코딩 완료 🎯 (`feat/observe`, 6/6). Grafana 스크린샷 → README embed까지 마침. 다음 = 커밋·PR 생성·머지 → PR 5 (운영 폴리싱) 시작.
+**현재 위치:** PR 5 진행중 (`feat/ops`, 1/7). T5.1 완료 — prometheus-adapter로 custom metric HPA 구축 (metrics-server 대신). `gateway-api` HPA가 `http_requests_per_second` 기준 (target 2, current 276m). 다음 = T5.2 (부하 → 스케일 관찰).
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
@@ -75,6 +75,7 @@ _없음_
 - **프론트엔드(Next.js) 판단 보류** (2026-08-08). 사용자 편의성·협업능력 어필 관점에서 재검토했으나 PR 1~5 완료 후 시간·필요성 재평가하기로. 현재 계획서 §12 결정(프론트 X) 유지, 대신 OpenAPI 문서/결정 로그/벤치마크로 협업능력·진정성 신호 대체.
 - **T1.3 스코프 축소: Anthropic 제외, OpenAI(gpt-4o-mini)만** (2026-08-08). Day 1 스코프 최소화. 필요시 model_list에 추가만 하면 되므로 확장 비용 저렴. `LITELLM_MASTER_KEY=sk-1234` (LiteLLM 커뮤니티 표준 dev 기본값).
 - **T2.3 트러블슈팅 (Docker Desktop 메모리)** (2026-08-11). vLLM CPU가 OOM 킬 → `Available RAM: 1.45 GiB` 로그 확인 → Docker Desktop 총 메모리 7.65GB에서 12GB로 확장 후 성공. Docker Desktop GUI가 트레이 모드로만 실행됐던 문제: `--reason=open-tray`로 시작됐음 → 원인 진단 후 UI 프로세스 재시작으로 GUI 복구. Daemon도 함께 재시작되어 kind 클러스터 1분 다운타임 있었으나 Pod들 자동 복구 (RESTARTS +2).
+- **T5.1 아키텍처 결정: metrics-server 대신 prometheus-adapter** (2026-08-15). 계획서 원안(CPU 기반 HPA + metrics-server) 대신 옵션 B(custom metric HPA + prometheus-adapter) 채택. 이유: (1) 우리 워크로드는 I/O bound라 CPU 스케일 무의미, (2) 이미 있는 Prometheus 재활용, (3) PR 4 관측성 → PR 5 관측 기반 스케일링 스토리 연결, (4) `pods/http_requests_per_second` 라는 요청 rate 기준이 실제 프로덕션 판단 기준에 가까움. custom.metrics.k8s.io API 등록 확인 후 HPA target `2` req/s per pod로 시작.
 - **T2.4~T2.7 K8s-vLLM 함정 3건** (2026-08-12):
   1. **`VLLM_PORT` 자동 주입 충돌** — Service 이름 `vllm` → K8s가 `VLLM_PORT=tcp://<IP>:8000` env 자동 주입 → vLLM이 int로 파싱하려다 크래시. 해결: Pod `spec.enableServiceLinks: false`
   2. **`/dev/shm` 64MB 부족** — K8s Pod 기본 shm이 vLLM multiproc executor(~160MB) 부족. 해결: `emptyDir { medium: Memory, sizeLimit: 2Gi }` 를 `/dev/shm`에 마운트
