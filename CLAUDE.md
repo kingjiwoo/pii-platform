@@ -20,7 +20,7 @@
 
 > **규칙:** task를 시작할 때 `⏳ 진행중`, 끝나면 `✅ 완료`로 이 섹션 즉시 업데이트. PR 머지되면 PR 라인도 업데이트. 옵시디언 계획서의 체크박스도 함께 갱신.
 
-**전체:** `46 / 52` task 완료 (88%)
+**전체:** `52 / 52` task 완료 (100%) 🏁
 
 | PR | 브랜치 | Task | 상태 |
 |----|--------|------|------|
@@ -29,9 +29,9 @@
 | PR 2 | `feat/vllm` → develop (PR #3 머지 완료, `1b4e0e6`) | 7/7 | ✅ 완료 🎉 |
 | PR 3 | `feat/routing` → develop (PR #4 머지 완료, `16d8b19`) | 8/8 | ✅ 완료 🎉 |
 | PR 4 | `feat/observe` → develop (PR #5 머지 완료, `7059c53`) | 6/6 | ✅ 완료 🎉 |
-| PR 5 | `feat/ops` (계획서 원안 `feat/day5-ops-polish`) | 1/7 | ⏳ 진행중 |
+| PR 5 | `feat/ops` (계획서 원안 `feat/day5-ops-polish`) | 7/7 | 🎉 코딩 완료, 머지 대기 |
 
-**현재 위치:** PR 5 진행중 (`feat/ops`, 1/7). T5.1 완료 — prometheus-adapter로 custom metric HPA 구축 (metrics-server 대신). `gateway-api` HPA가 `http_requests_per_second` 기준 (target 2, current 276m). 다음 = T5.2 (부하 → 스케일 관찰).
+**현재 위치:** 🏁 **프로젝트 종결 준비.** PR 5 코딩 완료 (7/7). README 최종 편집·포트폴리오 톤 조정·회고 문서 완성. 다음 = 커밋+PR+머지.
 
 **마일스톤:**
 - 🎯 **PR 1 완료** = 뱅크 K8s 필수요건 충족 (최우선)
