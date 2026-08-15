@@ -15,55 +15,55 @@
 ## 아키텍처
 
 ```
-[Client / 데모 스크립트]
-        │
-        ▼
-┌────────────────────────────────┐
-│  FastAPI Service (K8s)          │  ← BFF / 서비스 레이어
-│  · JWT 인증                     │
-│  · PII 감지 + 마스킹            │
-│  · 라우팅 결정 (model_name)     │
-│  · 요청 로깅·메트릭             │
-└────────────────┬───────────────┘
-                 │ model_name 명시 후 forward
-                 ▼
-┌────────────────────────────────┐
-│  LiteLLM Gateway (K8s)          │  ← 순수 LLM 라우팅
-│  · 모델 → 백엔드 매핑            │
-│  · retry / fallback             │
-│  · cost tracking                │
-└───────┬──────────────────┬─────┘
-        │ vllm-qwen         │ gpt-4o-mini
-        ▼                   ▼
-┌──────────────┐    ┌──────────────────┐
-│ vLLM (K8s,    │    │ 상용 API          │
-│ CPU, 소형)    │    │ (OpenAI/Anthropic)│
-│ = 온프레 처리 │    │ = 고품질 처리      │
-└──────────────┘    └──────────────────┘
-        │
-        ▼
-[Prometheus / Grafana]
-  · 민감 vs 비민감 트래픽 비율
-  · 클라이언트별 토큰 비용
-  · p50 / p95 / p99 latency, 에러율
-  · vLLM KV캐시 사용률·throughput
+[Client]  →  Ingress (api.localtest.me)
+                  │
+                  ▼
+      ┌────────────────────────────────┐
+      │  FastAPI (K8s Deployment)       │  ← 진입점 / 도메인 로직
+      │  · PII 감지 (Detector Protocol) │
+      │  · 마스킹 (Masker Protocol)     │
+      │  · 라우팅 판단 (Router Protocol)│
+      │  · Prometheus 커스텀 메트릭     │
+      └────────────────┬───────────────┘
+                       │ in-cluster: model_name 명시
+                       ▼
+      ┌────────────────────────────────┐
+      │  LiteLLM Proxy (K8s Deployment) │  ← LLM 어댑터 (OpenAI 호환)
+      │  · model → 백엔드 매핑            │
+      │  · master_key 인증               │
+      └───────┬──────────────────┬─────┘
+              │ vllm-qwen         │ gpt-4o-mini
+              ▼                   ▼
+      ┌──────────────┐    ┌──────────────┐
+      │ vLLM (K8s)    │    │ OpenAI API   │
+      │ Qwen2.5-0.5B  │    │ (상용)        │
+      │ 온프레 처리   │    │              │
+      └──────────────┘    └──────────────┘
+              │
+              ▼
+      [Prometheus + Grafana]
+        · PII vs Non-PII 라우팅 비율
+        · 모델별 요청 수
+        · p50 / p95 / p99 latency
+        · vLLM active requests · tokens/sec
+
+      [HPA (custom metric)]
+        · http_requests_per_second 기반 자동 스케일 (min 1, max 5)
 ```
 
 > **계층 분리:** FastAPI가 도메인 로직 (PII·auth·라우팅 결정), LiteLLM은 순수 LLM 어댑터. 관심사 분리로 각 계층의 확장 자유 확보.
 
-## 기술 스택 & 도메인 정당성
+## 기술 스택
 
-| 기술 | 왜 있는가 |
-|---|---|
-| **FastAPI Service** | **서비스 레이어 / BFF** — PII·auth·라우팅 결정 등 도메인 로직 응집 |
-| LiteLLM 게이트웨이 | 순수 LLM 어댑터 — model_name → 실제 백엔드 매핑, retry/fallback, cost tracking |
-| **vLLM on K8s (CPU, 소형 모델)** | 민감정보를 **밖으로 안 보내고** 처리하는 온프레 백엔드 |
-| PII 탐지 | 라우팅 **결정 로직** (한국어 정규식 + 옵션: Presidio) |
-| BYOK / JWT 인증 | 팀·클라이언트별 접근 통제 |
-| Prometheus / Grafana | **SLA·비용** 관측, 민감/비민감 트래픽 분리 |
-| Kubernetes + HPA | 운영·스케일·self-healing |
+| 계층 | 컴포넌트 | 역할 |
+|---|---|---|
+| **진입점** | FastAPI + Ingress-nginx | HTTP 파싱, 도메인 로직 (PII·라우팅), 커스텀 메트릭 노출 |
+| **어댑터** | LiteLLM Proxy | OpenAI 호환 스펙으로 여러 백엔드 통합 (retry, cost tracking 기본 제공) |
+| **온프레 백엔드** | vLLM (CPU, `Qwen2.5-0.5B-Instruct`) | 민감정보 외부 유출 없이 처리 |
+| **상용 백엔드** | OpenAI `gpt-4o-mini` | 일반 요청용 고품질 응답 |
+| **오케스트레이션** | Kubernetes (kind) + Helm | 선언적 배포, 롤아웃/롤백, self-healing |
+| **관측성** | kube-prometheus-stack + prometheus-adapter | 메트릭·대시보드·custom metric HPA |
 
-**주요 스택:** `kind`, `Helm`, `kubectl`, FastAPI, LiteLLM, vLLM (CPU), Prometheus, Grafana (kube-prometheus-stack), Docker
 
 ## 데모 시나리오
 
@@ -77,28 +77,26 @@
 
 | Day | 목표 | 산출물 |
 |-----|------|--------|
-| 1 | K8s 필수 확보 ⭐ (게이트웨이 배포) | kind 클러스터 + Helm 차트로 도는 LiteLLM |
-| 2 | vLLM을 K8s에 배포 (온프레 백엔드) | CPU 모드 vLLM Deployment + Service |
-| 3 | 민감도 라우팅 (도메인 핵심) | PII 감지 → vLLM / 미감지 → 상용 API |
-| 4 | 관측성 (SLA·비용) | Grafana 대시보드 |
-| 5 | 운영 티 + 문서화 | HPA, 롤백 시연, 아키텍처 다이어그램 |
-
-> Day 1만 끝나도 K8s 필수요건은 확보. 뒤 날짜는 전부 우대 가산점 → 시간 밀려도 손해 최소.
+| 1 | 게이트웨이 K8s 배포 | kind 클러스터 + Helm 차트로 도는 FastAPI + LiteLLM |
+| 2 | vLLM 온프레 백엔드 배포 | CPU 모드 vLLM Deployment + Service |
+| 3 | 민감도 기반 라우팅 (도메인 핵심) | PII 감지 → vLLM / 미감지 → 상용 API |
+| 4 | 관측성 스택 | Prometheus + Grafana 대시보드 |
+| 5 | 운영 시나리오 시연 | HPA (custom metric), 롤아웃/롤백, self-healing |
 
 ## 스코프 & 트레이드오프
 
-- **PII 탐지는 정규식 수준의 데모** — 핵심은 탐지 정확도가 아니라 "민감도로 라우팅을 가르는 아키텍처"
-- **프론트엔드 없음** — 이 프로젝트의 "UI"는 Grafana 대시보드 + 아키텍처 다이어그램. LLM Ops 포지션은 백엔드·인프라를 봄
-- **vLLM CPU 백업안** — CPU 이미지 빌드가 막히면 Colab GPU + `cloudflared` 터널로 전환. K8s 필수는 게이트웨이 배포로 이미 충족되어 있어 OK
+- **PII 탐지는 정규식 수준의 데모** — 핵심은 탐지 정확도가 아니라 "민감도로 라우팅을 가르는 아키텍처". 프로덕션에서는 사내 DLP 또는 Presidio 연동으로 대체 가능하도록 `Detector` Protocol 뒤에 격리
+- **프론트엔드 없음** — 이 프로젝트의 UI는 Grafana 대시보드 + 아키텍처 다이어그램. 프로젝트 관심사는 백엔드·인프라 계층
+- **CPU 서빙** — kind에서 vLLM CPU 모드로 실행. 프로덕션은 GPU 노드 필수 (튜닝 파라미터·리소스는 그대로 재사용, `values.yaml`의 image tag만 GPU 이미지로 교체)
 
 ## 상태
 
 - [x] 계획 완료
-- [x] **Day 1 — 게이트웨이 K8s 배포** ✅ (PR #2 머지, 2026-08-09) → [빠른 시작](#빠른-시작-day-1-완성분)
+- [x] **Day 1 — 게이트웨이 K8s 배포** ✅ (PR #2 머지, 2026-08-09) → [빠른 시작](#빠른-시작)
 - [x] **Day 2 — vLLM 배포** ✅ (PR #3 머지, 2026-08-12) — CPU 모드로 Qwen2.5-0.5B-Instruct 서빙
 - [x] **Day 3 — 하이브리드 라우팅** ✅ (PR #4 머지, 2026-08-13) — PII → 온프레 vLLM, 일반 → OpenAI
-- [x] **Day 4 — 관측성** ✅ (Prometheus + Grafana) → [대시보드](#관측성-grafana-대시보드)
-- [ ] Day 5 — 운영·문서화
+- [x] **Day 4 — 관측성** ✅ (PR #5 머지, 2026-08-14) → [대시보드](#관측성-grafana-대시보드)
+- [x] **Day 5 — 운영 시나리오** ✅ (2026-08-16) → [운영 기능](#운영-hpa--롤아웃--self-healing)
 
 ## 관측성 (Grafana 대시보드)
 
@@ -119,7 +117,69 @@ kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
 # http://localhost:3000/d/hybrid-llm-gateway (admin / admin123)
 ```
 
-## 빠른 시작 (Day 1 완성분)
+## 운영 (HPA · 롤아웃 · Self-healing)
+
+세 가지 K8s 운영 시나리오를 재사용 가능 스크립트로 시연.
+
+### HPA (Custom Metric 기반)
+
+CPU가 아닌 **요청 rate 기반** 스케일링 — I/O bound 워크로드에 맞는 신호. `prometheus-adapter`로 `http_requests_total`을 rate 계산해 `pods/http_requests_per_second` 라는 custom metric으로 K8s Metrics API에 노출, HPA v2가 이를 참조.
+
+```yaml
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 5
+  customMetrics:
+    - type: Pods
+      pods:
+        metric: { name: http_requests_per_second }
+        target: { type: AverageValue, averageValue: "2" }
+```
+
+**부하 시연 결과** (`hey -z 60s -c 20 -m GET http://api.localtest.me/health/liveliness`):
+```
+T=0s    REPLICAS=1  TARGETS=276m/2      (idle)
+T=20s   REPLICAS=1  TARGETS=547671m/2   (부하 감지)
+T=30s   REPLICAS=4  TARGETS=1846626m/2  (SCALE UP)
+T=50s   REPLICAS=5  TARGETS=1375053m/2  (max 도달)
+T=60s   부하 종료
+T=180s  REPLICAS=5  TARGETS=264m/2      (metric 회복, 5분 stabilization 대기 중)
+```
+
+Scale-up 반응 시간 **20초**. Scale-down은 기본 5분 stabilization window로 보수적 처리.
+
+### 롤링 업데이트 · 롤백
+
+```bash
+# 새 태그로 배포 (자동 rolling update)
+helm upgrade gateway-api ./deploy/helm/api --set image.tag=dev-v2
+
+# 문제 발생 시 즉시 롤백 (전용 스크립트)
+./scripts/rollback-demo.sh
+```
+
+`helm rollback`은 **새 revision 엔트리를 추가**해 이전 상태로 복귀 (git revert 스타일, 히스토리 보존).
+
+### Self-healing
+
+```bash
+./scripts/kill-pod-demo.sh
+# → Pod 강제 삭제 → ReplicaSet 컨트롤러가 10초 내 재생성
+```
+
+Declarative 모델의 실증 — Pod을 죽여도 사람 개입 없이 자동 복구.
+
+### 재사용 스크립트
+
+| 스크립트 | 목적 |
+|---|---|
+| `scripts/smoke-api.sh` | E2E 스모크 (Ingress → FastAPI → LiteLLM → OpenAI) |
+| `scripts/demo-scenario.sh` | 하이브리드 라우팅 데모 (PII vs 일반) |
+| `scripts/rollback-demo.sh` | Helm rollback 시연 |
+| `scripts/kill-pod-demo.sh` | Self-healing 시연 |
+| `scripts/install-monitoring.sh` | kube-prometheus-stack 배포 |
+
+## 빠른 시작
 
 FastAPI + LiteLLM 2-service 하이브리드 게이트웨이를 로컬 kind 클러스터에 배포하고 스모크 테스트.
 
