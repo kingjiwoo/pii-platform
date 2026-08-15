@@ -1,0 +1,47 @@
+# Secrets & env
+.env
+.env.local
+.env.*.local
+secrets/
+*.key
+*.pem
+kubeconfig
+kubeconfig.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Helm packaged charts & downloaded deps
+*.tgz
+deploy/helm/*/charts/
+values.local.yaml
+values.*.local.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
